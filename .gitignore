@@ -6,3 +6,5 @@ src/test.ts
 
 config/*
 !config/default.json5
+
+package-lock.json
