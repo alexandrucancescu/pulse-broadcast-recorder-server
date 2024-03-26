@@ -1,0 +1,12 @@
+{
+  logLevel: 'info',
+  recordings: {
+    audio: {
+      format: 'aac',
+      bitrate: 320,
+    },
+    segmentTime: '15m',
+    expires: '3 months',
+    shareLinkExpires: '2 weeks'
+  }
+}

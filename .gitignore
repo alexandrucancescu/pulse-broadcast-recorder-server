@@ -5,4 +5,4 @@ dist
 src/test.ts
 
 config/*
-!config/default
+!config/default.json5
