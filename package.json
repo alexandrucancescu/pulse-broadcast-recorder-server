@@ -24,7 +24,7 @@
     "drizzle-kit": "^0.20.14",
     "drizzle-orm": "^0.30.4",
     "fastify": "^4.26.2",
-    "fluent-ffmpeg": "^2.1.2",
+    "fluent-ffmpeg": "github:alexandrucancescu/node-fluent-ffmpeg",
     "ip": "^2.0.1",
     "jsonwebtoken": "^9.0.2",
     "paranoid-config": "^2.0.2",
