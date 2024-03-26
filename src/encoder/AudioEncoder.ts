@@ -101,7 +101,6 @@ export default class AudioEncoder extends EventEmitter {
 				this.emit(err)
 			})
 			.on('end', () => {
-				console.log('ended')
 				this.emit('end')
 			})
 

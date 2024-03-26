@@ -3,6 +3,7 @@ import Store, { ReadStreamOptions } from './Store'
 import { createClient, WebDAVClient } from 'webdav'
 import { join } from 'path'
 import { Readable } from 'node:stream'
+import { Logger } from 'pino'
 
 export type WebDavConfig = {
 	url: string
@@ -12,11 +13,13 @@ export type WebDavConfig = {
 
 export default class WebDavStore implements Store {
 	private readonly path: string
+	private readonly log: Logger
 
 	private readonly webDavClient: WebDAVClient
 
-	constructor(path: string, config: WebDavConfig) {
+	constructor(path: string, config: WebDavConfig, log: Logger) {
 		this.path = path
+		this.log = log
 		this.webDavClient = createClient(config.url, {
 			username: config.user,
 			password: config.password ?? process.env['WEBDAV_PASS'],
@@ -33,7 +36,7 @@ export default class WebDavStore implements Store {
 		await this.webDavClient.createDirectory(this.path, {
 			recursive: true,
 		})
-		console.log('created dir', this.path)
+		this.log.info(`Created directory ${this.path}`)
 		return this
 	}
 

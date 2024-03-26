@@ -16,7 +16,7 @@ const rtpReceiver = new RtpReceiver({
 	host: config.rtp.host,
 })
 
-let store = await createStore(config.store)
+let store = await createStore(config.store, log)
 
 const recordingManager = new RecordingManager(rtpReceiver, store, log)
 

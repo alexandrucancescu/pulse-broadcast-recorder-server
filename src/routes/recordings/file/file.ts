@@ -58,11 +58,6 @@ export default async function (
 			} else {
 				const { start, end } = ranges[0]
 
-				console.log(
-					file,
-					`${start} - ${end} / ${size}, ${req.headers.range}`
-				)
-
 				const readStream = store.createReadStream(file, {
 					start,
 					end: end + 1, // Some implementations require the end to be inclusive
@@ -81,8 +76,6 @@ export default async function (
 				return reply.send(readStream)
 			}
 		}
-
-		console.log('no range')
 
 		return reply.send(store.createReadStream(file))
 	})

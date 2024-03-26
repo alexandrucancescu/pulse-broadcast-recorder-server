@@ -31,8 +31,6 @@ export default async function (app: FastifyInstance) {
 
 			const encodedToken = encodeURIComponent(token)
 
-			console.log({ encodedToken })
-
 			return {
 				expires: addMilliseconds(
 					new Date(),
