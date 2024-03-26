@@ -1,0 +1,1 @@
+ALTER TABLE "recording" ALTER COLUMN "file" SET DATA TYPE varchar;
