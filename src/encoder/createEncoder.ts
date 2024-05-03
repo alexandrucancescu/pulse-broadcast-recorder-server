@@ -7,6 +7,7 @@ import { promisify } from 'util'
 import { Logger } from 'pino'
 import AudioFormat from './AudioFormat.js'
 import { Writable } from 'stream'
+import audioFormat from './AudioFormat.js'
 
 const availableEncoders = await promisify(
 	Ffmpeg.getAvailableEncoders
@@ -14,38 +15,59 @@ const availableEncoders = await promisify(
 
 const defaultFormatEncoderOptions: Record<
 	AudioFormat,
-	{ format: string; codecs: string[]; options: string[] } | undefined
+	| {
+			format: string
+			codecs: string[]
+			options: string[]
+			extension: string
+	  }
+	| undefined
 > = {
 	[AudioFormat.MP3]: {
 		format: 'mp3',
 		codecs: ['libmp3lame'],
 		options: [],
+		extension: 'mp3',
 	},
 	[AudioFormat.ADTS]: {
 		format: 'adts',
 		codecs: ['libfdk_aac', 'aac'],
 		options: ['-profile:a', 'aac_low'],
+		extension: 'aac',
 	},
 	[AudioFormat.AAC]: {
 		format: 'adts',
 		codecs: ['libfdk_aac', 'aac'],
 		options: ['-profile:a', 'aac_low'],
+		extension: 'aac',
 	},
 	[AudioFormat.AAC_HE]: {
 		format: 'adts',
 		codecs: ['libfdk_aac'],
 		options: ['-profile:a', 'aac_he'],
+		extension: 'aac',
 	},
 	[AudioFormat.AAC_HE_V2]: {
 		format: 'adts',
 		codecs: ['libfdk_aac'],
 		options: ['-profile:a', 'aac_he_v2'],
+		extension: 'aac',
 	},
 	[AudioFormat.OPUS]: {
 		format: 'ogg',
 		codecs: ['libopus', 'opus'],
 		options: [],
+		extension: 'ogg',
 	},
+}
+
+export function getExtensionForAudioFormat(
+	audioFormat: string
+): string {
+	return (
+		defaultFormatEncoderOptions[<AudioFormat>audioFormat]
+			?.extension ?? 'unknown'
+	)
 }
 
 export default function createEncoder(

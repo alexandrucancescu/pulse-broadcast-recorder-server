@@ -1,22 +1,16 @@
 import { Static, Type } from '@sinclair/typebox'
 import { FastifyInstance, RouteGenericInterface } from 'fastify'
-import { eq } from 'drizzle-orm/sql/expressions/conditions'
-import { recording } from '../../../db/schema.js'
-import db from '../../../db/db.js'
-import type { RouteOptions } from '../../../types'
-import sendDownloadableFile from '../../../util/sendDownloadableFile.js'
-export default async function (
-	app: FastifyInstance,
-	{ store }: RouteOptions
-) {
+import sendDownloadableFile from '../../../../util/sendDownloadableFile.js'
+
+export default async function (app: FastifyInstance) {
 	app.get<RequestType>(
 		'/download/:file',
 		options,
 		async (req, reply) => {
 			const { file } = req.params
 
-			const rec = await db.query.recording.findFirst({
-				where: eq(recording.file, file),
+			const rec = await app.repository.recordings.findOne({
+				where: { file },
 			})
 
 			if (!rec) {
@@ -26,7 +20,12 @@ export default async function (
 				}
 			}
 
-			return sendDownloadableFile(reply, store, file, rec.format)
+			return sendDownloadableFile(
+				reply,
+				app.store,
+				file,
+				rec.format
+			)
 		}
 	)
 }

@@ -15,9 +15,9 @@ type ConstructorProps = {
 	host?: string
 }
 
-// declare interface RtpReceiver {
-// 	on(event: 'data', handler: (chunk: Buffer) => void): this
-// }
+declare interface RtpReceiver {
+	on(event: 'data', handler: (chunk: Buffer) => void): this
+}
 
 class RtpReceiver extends EventEmitter {
 	private readonly port: number

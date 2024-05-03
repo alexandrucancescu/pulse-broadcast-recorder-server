@@ -1,0 +1,17 @@
+Dockerfile
+.dockerignore
+node_modules
+npm-debug.log
+README.md
+.next
+.git
+.gitignore
+.prettierrc
+
+.DS_Store
+
+src
+dist/test.*
+gsuite.pem
+local.db
+tsconfig.json

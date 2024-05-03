@@ -8,3 +8,7 @@ config/*
 !config/default.json5
 
 package-lock.json
+
+gsuite.pem
+local.db
+secret_key

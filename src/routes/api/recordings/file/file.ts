@@ -1,22 +1,13 @@
 import { Static, Type } from '@sinclair/typebox'
 import { FastifyInstance, RouteGenericInterface } from 'fastify'
-import { eq } from 'drizzle-orm/sql/expressions/conditions'
 import parseRange from 'range-parser'
-import { recording } from '../../../db/schema.js'
-import db from '../../../db/db.js'
-import type { RouteOptions } from '../../../types'
-import { FormatContentTypeMap } from '../../../util/contentType.js'
+import { FormatContentTypeMap } from '../../../../util/contentType.js'
 
-export default async function (
-	app: FastifyInstance,
-	{ store }: RouteOptions
-) {
-	app.get<RequestType>('/:file', options, async (req, reply) => {
-		const { file } = req.params
+export default async function (app: FastifyInstance) {
+	app.get<RequestType>('/*', options, async (req, reply) => {
+		const file = req.params['*']
 
-		const rec = await db.query.recording.findFirst({
-			where: eq(recording.file, file),
-		})
+		const rec = await app.repository.recordings.findOneBy({ file })
 
 		if (!rec) {
 			reply.status(404)
@@ -25,8 +16,8 @@ export default async function (
 			}
 		}
 
-		const size = await store.getFileSize(file)
-		const readStream = store.createReadStream(file)
+		const size = await app.store.getFileSize(file)
+		const readStream = app.store.createReadStream(file)
 
 		if (!readStream) {
 			reply.status(500)
@@ -58,7 +49,7 @@ export default async function (
 			} else {
 				const { start, end } = ranges[0]
 
-				const readStream = store.createReadStream(file, {
+				const readStream = app.store.createReadStream(file, {
 					start,
 					end: end + 1, // Some implementations require the end to be inclusive
 				})
@@ -77,14 +68,14 @@ export default async function (
 			}
 		}
 
-		return reply.send(store.createReadStream(file))
+		return reply.send(app.store.createReadStream(file))
 	})
 }
 
 const options = {
 	schema: {
 		params: Type.Object(
-			{ file: Type.String() },
+			{ '*': Type.String() },
 			{ additionalProperties: false }
 		),
 	},

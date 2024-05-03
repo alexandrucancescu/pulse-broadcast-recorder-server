@@ -1,5 +1,17 @@
 {
   logLevel: 'info',
+  timezone: 'Europe/London',
+  rtp: {
+
+    /*
+      When RTP receives no data, how long in seconds before stopping the encoder
+    */
+    noDataStopDelay: 1.5
+  },
+  http: {
+    host: 'localhost',
+    port: 3000
+  },
   recordings: {
     audio: {
       format: 'aac',
@@ -8,5 +20,8 @@
     segmentTime: '15m',
     expires: '3 months',
     shareLinkExpires: '2 weeks'
+  },
+  db: {
+    type: 'sqlite',
   }
 }

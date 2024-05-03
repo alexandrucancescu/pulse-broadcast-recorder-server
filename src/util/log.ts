@@ -6,6 +6,9 @@ const isProduction = process.env.NODE_ENV === 'production'
 
 export default pino({
 	level: config.logLevel ?? process.env.LOG_LEVEL ?? 'debug',
+	redact: {
+		paths: ['secret', 'secretKey'],
+	},
 	transport: isProduction
 		? undefined
 		: {

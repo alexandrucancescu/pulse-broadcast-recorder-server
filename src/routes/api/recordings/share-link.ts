@@ -1,11 +1,8 @@
 import { FastifyInstance, RouteGenericInterface } from 'fastify'
-import { eq } from 'drizzle-orm/sql/expressions/conditions'
 import { Static, Type } from '@sinclair/typebox'
 import { addMilliseconds } from 'date-fns'
 import jwt from 'jsonwebtoken'
-import db from '../../db/db.js'
-import { recording } from '../../db/schema.js'
-import config from '../../config.js'
+import config from '../../../config.js'
 
 export default async function (app: FastifyInstance) {
 	app.get<RequestType>(
@@ -14,8 +11,8 @@ export default async function (app: FastifyInstance) {
 		async (req, reply) => {
 			const { id } = req.params
 
-			const rec = await db.query.recording.findFirst({
-				where: eq(recording.id, id),
+			const rec = await app.repository.recordings.findOneBy({
+				id,
 			})
 
 			if (!rec) {
@@ -36,7 +33,7 @@ export default async function (app: FastifyInstance) {
 					new Date(),
 					config.recordings.shareLinkExpiresMs
 				),
-				url: `/recordings/file/shared/${encodedToken}`,
+				url: `/api/recordings/file/shared/${encodedToken}`,
 			}
 		}
 	)

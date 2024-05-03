@@ -1,15 +1,10 @@
 import { Static, Type } from '@sinclair/typebox'
 import { FastifyInstance, RouteGenericInterface } from 'fastify'
 import jwt from 'jsonwebtoken'
-import config from '../../../config.js'
-import db from '../../../db/db.js'
-import sendDownloadableFile from '../../../util/sendDownloadableFile.js'
-import { RouteOptions } from '../../../types'
+import config from '../../../../config.js'
+import sendDownloadableFile from '../../../../util/sendDownloadableFile.js'
 
-export default async function (
-	app: FastifyInstance,
-	{ store }: RouteOptions
-) {
+export default async function (app: FastifyInstance) {
 	app.get<RequestType>(
 		'/shared/:token',
 		options,
@@ -24,8 +19,8 @@ export default async function (
 						.status(401)
 						.send({ error: 'Share link is invalid' })
 
-				const rec = await db.query.recording.findFirst({
-					where: (rec, { eq }) => eq(rec.id, id),
+				const rec = await app.repository.recordings.findOneBy({
+					id,
 				})
 
 				if (!rec)
@@ -35,7 +30,7 @@ export default async function (
 
 				return sendDownloadableFile(
 					reply,
-					store,
+					app.store,
 					rec.file,
 					rec.format
 				)

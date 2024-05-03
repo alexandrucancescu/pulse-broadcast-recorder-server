@@ -3,6 +3,7 @@ import Ffmpeg, { FfmpegCommand } from 'fluent-ffmpeg'
 import type { Logger } from 'pino'
 import EventEmitter from 'events'
 import { Writable } from 'stream'
+import { da } from 'date-fns/locale'
 
 export type InputFormat = {
 	channels?: number
@@ -24,6 +25,7 @@ export type OutputFormat = {
 export default class AudioEncoder extends EventEmitter {
 	private ffmpeg: FfmpegCommand
 	private inputStream: PassThrough
+	private _bytesWritten: number
 	private readonly outputStream: Writable
 	private readonly inputFormat: InputFormat
 	public readonly outputFormat: OutputFormat
@@ -41,6 +43,7 @@ export default class AudioEncoder extends EventEmitter {
 		this.outputFormat = outputFormat
 		this.outputStream = outputStream
 		this.log = log
+		this._bytesWritten = 0
 	}
 
 	private createFfmpegCommand() {
@@ -120,6 +123,8 @@ export default class AudioEncoder extends EventEmitter {
 			const endHandler = () => {
 				clearTimeout(timeout)
 				this.outputStream.end(() => resolve())
+
+				this.removeAllListeners()
 			}
 
 			this.ffmpeg.on('end', endHandler)
@@ -132,7 +137,14 @@ export default class AudioEncoder extends EventEmitter {
 	}
 
 	public write(data: Buffer) {
-		this.inputStream.write(data)
+		this.inputStream.write(
+			data,
+			() => (this._bytesWritten += data.byteLength)
+		)
+	}
+
+	public get bytesWritten(): number {
+		return this._bytesWritten
 	}
 
 	public get bitRate(): number {

@@ -1,7 +1,7 @@
 import { Writable } from 'stream'
 import Store, { ReadStreamOptions } from './Store'
-import { createClient, WebDAVClient } from 'webdav'
-import { join } from 'path'
+import { createClient, FileStat, WebDAVClient } from 'webdav'
+import { join, dirname } from 'node:path'
 import { Readable } from 'node:stream'
 import { Logger } from 'pino'
 
@@ -40,10 +40,47 @@ export default class WebDavStore implements Store {
 		return this
 	}
 
-	public createWriteStream(filename: string): Writable {
+	public async createWriteStream(
+		filename: string
+	): Promise<Writable> {
+		await this.ensureDirForFile(filename)
 		return this.webDavClient.createWriteStream(
 			join(this.path, filename)
 		)
+	}
+
+	public async getDirectoryContents(
+		path: string,
+		recursive: boolean = false
+	): Promise<string[]> {
+		const fileStats = <FileStat[]>(
+			await this.webDavClient.getDirectoryContents(path, {
+				deep: recursive,
+			})
+		)
+
+		return fileStats
+			.filter((fs) => fs.type === 'file')
+			.map((fs) => fs.filename)
+	}
+
+	public async getAllFiles(): Promise<string[]> {
+		return this.getDirectoryContents(this.path, true)
+	}
+
+	public async deleteFile(filename: string) {
+		await this.webDavClient.deleteFile(join(this.path, filename))
+	}
+
+	private async ensureDirForFile(filename: string) {
+		const dir = dirname(filename)
+
+		if (dir.length > 0 && dir !== '.') {
+			await this.webDavClient.createDirectory(
+				join(this.path, dir),
+				{ recursive: true }
+			)
+		}
 	}
 
 	public createReadStream(

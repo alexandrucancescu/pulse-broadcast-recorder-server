@@ -1,40 +1,39 @@
 import { Static, Type } from '@sinclair/typebox'
 import { FastifyInstance, RouteGenericInterface } from 'fastify'
 import { addMilliseconds } from 'date-fns'
-import db from '../../db/db.js'
-import { recording } from '../../db/schema.js'
-import config from '../../config.js'
-import { desc, count } from 'drizzle-orm'
+import { MoreThanOrEqual, LessThanOrEqual } from 'typeorm'
+import config from '../../../config.js'
 
 export default async function (app: FastifyInstance) {
 	app.get<RequestType>('/', options, async (req, reply) => {
 		const { page = 0, perPage = 50, start, end } = req.query
 
-		const query = db.query.recording.findMany({
-			orderBy: [desc(recording.start)],
-			offset: page * perPage,
-			limit: perPage,
-			where: (recordings, { gte, lte, and }) =>
-				and(
-					start
-						? gte(recordings.end, new Date(start))
-						: undefined,
-					end ? lte(recordings.start, new Date(end)) : undefined
-				),
-		})
+		const whereConditions = {
+			end: start ? MoreThanOrEqual(new Date(start)) : undefined,
+			start: end ? LessThanOrEqual(new Date(end)) : undefined,
+		}
 
-		const recordings = (await query).map((record) => ({
+		const recordings = (
+			await app.repository.recordings.find({
+				take: perPage,
+				skip: page * perPage,
+				order: {
+					start: 'DESC',
+				},
+				where: whereConditions,
+			})
+		).map((record) => ({
 			...record,
-			fileUrl: `/recordings/file/${record.file}`,
+			fileUrl: `/api/recordings/file/${record.file}`,
 			expires: addMilliseconds(
 				record.start,
 				config.recordings.expiresMs
 			),
 		}))
 
-		const [{ total }] = await db
-			.select({ total: count() })
-			.from(recording)
+		const total = await app.repository.recordings.count({
+			where: whereConditions,
+		})
 
 		return {
 			total,
